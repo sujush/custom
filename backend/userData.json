@@ -10,5 +10,30 @@
   {
     "email": "client@client.com",
     "password": "0000"
+  },
+  {
+    "email": "abc@abc.com",
+    "password": "$2b$10$7OMU5zzzeLwgYKgULKsxFugHZpBYLYKsh/gFZyFo9YWySi2ZdohJu"
+  },
+  {
+    "email": "aaa@aaa.com",
+    "password": "$2b$10$hpXGy.B/350WTySmy3pL5.nZ40zhO42D.YKVbFyP.4edt.QPwyvKG"
+  },
+  {
+    "email": "mind@mind.com",
+    "password": "$2b$10$wrJw2YcXQSXI2COMTBhKE.aWfgc93kg9aWNHmIIhBMzFTLm9kTvo6"
+  },
+  {
+    "email": "qqq@qqq.com",
+    "password": "$2b$10$cn/RXJ3C/tgM/GEmphZpae1lPHjdb7GaEgZttt0wnBF3VLl234D46"
+  },
+  {
+    "email": "www@www.com",
+    "password": "$2b$10$dS.cuUf7N27dakkzH5/RYeNRWNkpSI8imi3wdOEZSC3wC86.6UDXK"
+  },
+  {
+    "email": "test@test.com",
+    "password": "$2b$10$pk430cKXPWa2nWOsEHSh4.6tJUNnbDCjsI/haPKSeCZHcWygahRai",
+    "nickname": "테스트"
   }
 ]

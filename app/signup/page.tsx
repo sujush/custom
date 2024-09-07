@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 export default function SignupPage() {
+  const [nickname, setNickname] = useState('')  // 닉네임 상태 추가
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -31,7 +32,7 @@ export default function SignupPage() {
       const response = await fetch('http://localhost:5000/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, userType }),
+        body: JSON.stringify({ email, password, nickname, userType }),
       })
       if (response.ok) {
         console.log('회원가입 성공:', email, userType)
@@ -54,12 +55,23 @@ export default function SignupPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+              <Label htmlFor="nickname">닉네임</Label>  {/* 닉네임 입력 필드 추가 */}
+              <Input
+                id="nickname"
+                type="text"
+                placeholder=""
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                required
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="email">이메일</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="your@email.com"
+                placeholder=""
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

@@ -13,12 +13,20 @@ const warehouses = {
   '남동': ['하나로 보세창고']
 }
 
+interface Inspector {
+  nickname: string;
+  email: string;
+  fee: number;
+  accountNumber: string;
+  bankName: string;
+}
+
 export default function ClientPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [selectedArea, setSelectedArea] = useState('')
   const [selectedWarehouse, setSelectedWarehouse] = useState('')
   const [selectedTime, setSelectedTime] = useState('')
-  const [inspectorInfo, setInspectorInfo] = useState(null)
+  const [inspectorInfo, setInspectorInfo] = useState<Inspector[] | null>(null)
   const [availableWarehouses, setAvailableWarehouses] = useState([])
   const router = useRouter()
 
@@ -45,20 +53,20 @@ export default function ClientPage() {
     }
   }
 
-  const handleAreaSelect = (area) => {
+  const handleAreaSelect = (area: string) => {
     setSelectedArea(area)
     setSelectedWarehouse('')
     setSelectedTime('')
     setInspectorInfo(null)
   }
 
-  const handleWarehouseSelect = (warehouse) => {
+  const handleWarehouseSelect = (warehouse: string) => {
     setSelectedWarehouse(warehouse)
     setSelectedTime('')
     setInspectorInfo(null)
   }
 
-  const handleTimeSelect = async (time) => {
+  const handleTimeSelect = async (time: string) => {
     setSelectedTime(time)
     if (selectedWarehouse) {
       try {
@@ -97,11 +105,10 @@ export default function ClientPage() {
         <div>
           <h2 className="text-xl font-semibold mb-2">{selectedArea} 창고 목록</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {warehouses[selectedArea].map((warehouse) => (
+            {warehouses[selectedArea as keyof typeof warehouses].map((warehouse: string) => (
               <Card key={warehouse} className="cursor-pointer hover:shadow-lg transition-shadow duration-300" onClick={() => handleWarehouseSelect(warehouse)}>
                 <CardContent className="flex items-center justify-center h-20 relative">
                   <h3 className="text-lg">{warehouse}</h3>
-                  <div className={`absolute bottom-2 right-2 w-3 h-3 rounded-full ${availableWarehouses.includes(warehouse) ? 'bg-green-500' : 'bg-red-500'}`}></div>
                 </CardContent>
               </Card>
             ))}

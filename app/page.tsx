@@ -7,11 +7,16 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { checkAuth, removeToken } from '@/app/utils/auth'
 
+interface WarehouseData {
+  warehouse: string;
+  time: string;
+}
+
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [availableWarehouses, setAvailableWarehouses] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [availableWarehouses, setAvailableWarehouses] = useState<WarehouseData[]>([])
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   const today = new Date()
@@ -29,12 +34,16 @@ export default function Home() {
       if (!response.ok) {
         throw new Error('Failed to fetch available warehouses')
       }
-      const data = await response.json()
+      const data: WarehouseData[] = await response.json()
       console.log('Fetched data:', data) // 디버깅을 위한 로그
       setAvailableWarehouses(data)
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error fetching available warehouses:', error)
-      setError(error.message)
+      if (error instanceof Error) {
+        setError(error.message)
+      } else {
+        setError('알 수 없는 오류가 발생했습니다.')
+      }
     } finally {
       setIsLoading(false)
     }
@@ -93,7 +102,6 @@ export default function Home() {
               </Card>
             </Link>
           </div>
-
           <Card className="mt-8">
             <CardContent>
               <h3 className="text-xl font-medium mb-4">
@@ -107,7 +115,7 @@ export default function Home() {
                 <ul className="space-y-2">
                   {availableWarehouses.map((item, index) => (
                     <li key={index} className="flex justify-between items-center">
-                      <span className="text-gray-700">{`${item.date} ${item.warehouse}`}</span>
+                      <span className="text-gray-700">{item.warehouse}</span>
                       <span className="text-green-600 font-medium">{item.time}</span>
                     </li>
                   ))}
