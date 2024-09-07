@@ -1,17 +1,5 @@
 [
   {
-    "email": "admin@admin.com",
-    "password": "admin"
-  },
-  {
-    "email": "ad@ad.com",
-    "password": "ad"
-  },
-  {
-    "email": "client@client.com",
-    "password": "0000"
-  },
-  {
     "email": "abc@abc.com",
     "password": "$2b$10$7OMU5zzzeLwgYKgULKsxFugHZpBYLYKsh/gFZyFo9YWySi2ZdohJu"
   },
@@ -35,5 +23,10 @@
     "email": "test@test.com",
     "password": "$2b$10$pk430cKXPWa2nWOsEHSh4.6tJUNnbDCjsI/haPKSeCZHcWygahRai",
     "nickname": "테스트"
+  },
+  {
+    "email": "admin@admin.com",
+    "password": "$2b$10$8.LfHxzSVu6LJMxSl5mjQOGmhk7XJp7QuVBISx1WFNz5oOJBkQNde",
+    "nickname": "관리자"
   }
 ]

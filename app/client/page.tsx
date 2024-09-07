@@ -27,7 +27,6 @@ export default function ClientPage() {
   const [selectedWarehouse, setSelectedWarehouse] = useState('')
   const [selectedTime, setSelectedTime] = useState('')
   const [inspectorInfo, setInspectorInfo] = useState<Inspector[] | null>(null)
-  const [availableWarehouses, setAvailableWarehouses] = useState([])
   const router = useRouter()
 
   useEffect(() => {
@@ -35,23 +34,8 @@ export default function ClientPage() {
       router.push('/login?redirectTo=/client')
     } else {
       setIsAuthenticated(true)
-      fetchAvailableWarehouses()
     }
   }, [router])
-
-  const fetchAvailableWarehouses = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/api/available-warehouses')
-      if (response.ok) {
-        const data = await response.json()
-        setAvailableWarehouses(data)
-      } else {
-        console.error('Failed to fetch available warehouses')
-      }
-    } catch (error) {
-      console.error('Error fetching available warehouses:', error)
-    }
-  }
 
   const handleAreaSelect = (area: string) => {
     setSelectedArea(area)

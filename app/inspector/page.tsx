@@ -8,7 +8,6 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { checkAuth, getToken } from '@/app/utils/auth'
 
 const areas = ['구항', '신항', '남동']
@@ -34,8 +33,6 @@ export default function InspectorPage() {
   const [selectedArea, setSelectedArea] = useState('')
   const [selectedWarehouse, setSelectedWarehouse] = useState('')
   const [selectedTime, setSelectedTime] = useState('')
-  const [nickname, setNickname] = useState('')
-  const [email, setEmail] = useState('')
   const [fee, setFee] = useState('')
   const [accountNumber, setAccountNumber] = useState('')
   const [bankName, setBankName] = useState('')
@@ -43,7 +40,6 @@ export default function InspectorPage() {
   const [confirmed, setConfirmed] = useState(false)
   const [error, setError] = useState('')
   const [myInspections, setMyInspections] = useState<Inspection[]>([])
-  const [inspectionHistory, setInspectionHistory] = useState<Inspection[]>([])
   const [userInfo, setUserInfo] = useState({ nickname: '', email: '' })
 
   const router = useRouter()
@@ -55,7 +51,6 @@ export default function InspectorPage() {
       fetchUserInfo()
       setIsAuthenticated(true)
       fetchMyInspections()
-      fetchInspectionHistory()
     }
   }, [router])
 
@@ -91,23 +86,6 @@ export default function InspectorPage() {
       }
     } catch (error) {
       console.error('Error fetching user info:', error)
-    }
-  }
-
-  const fetchInspectionHistory = async () => {
-    try {
-      const token = getToken()
-      const response = await fetch('http://localhost:5000/api/inspector/history', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-      if (response.ok) {
-        const data = await response.json()
-        setInspectionHistory(data)
-      }
-    } catch (error) {
-      console.error('Error fetching inspection history:', error)
     }
   }
 
@@ -155,8 +133,8 @@ export default function InspectorPage() {
         body: JSON.stringify({
           warehouse: selectedWarehouse,
           time: selectedTime,
-          nickname,
-          email,
+          nickname: userInfo.nickname,
+          email: userInfo.email,
           fee,
           accountNumber,
           bankName

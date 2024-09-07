@@ -19,8 +19,8 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
-  const today = new Date()
-  const formattedDate = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`
+  // const today = new Date()
+  // const formattedDate = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`
 
   useEffect(() => {
     setIsLoggedIn(checkAuth())
