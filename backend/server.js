@@ -177,6 +177,9 @@ app.get('/api/my-inspections', authenticateToken, (req, res) => {
   res.json(myInspections);
 });
 
+app.get('/test', (req, res) => {
+  res.send('Server is working!');
+});
 
 // 검사자 정보 조회 API
 app.get('/api/inspector', (req, res) => {
