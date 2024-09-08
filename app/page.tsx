@@ -30,7 +30,7 @@ export default function Home() {
   const fetchAvailableWarehouses = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch('http://localhost:5000/api/available-warehouses')
+      const response = await fetch('http://3.17.135.110:5000/api/available-warehouses')
       if (!response.ok) {
         throw new Error('Failed to fetch available warehouses')
       }

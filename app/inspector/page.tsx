@@ -57,7 +57,7 @@ export default function InspectorPage() {
   const fetchMyInspections = async () => {
     try {
       const token = getToken()
-      const response = await fetch('http://localhost:5000/api/my-inspections', {
+      const response = await fetch('http://3.17.135.110:5000/api/my-inspections', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -75,7 +75,7 @@ export default function InspectorPage() {
   const fetchUserInfo = async () => {
     try {
       const token = getToken()
-      const response = await fetch('http://localhost:5000/api/user', {
+      const response = await fetch('http://3.17.135.110:5000/api/user', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -124,7 +124,7 @@ export default function InspectorPage() {
   const handleConfirm = async () => {
     try {
       const token = getToken()
-      const response = await fetch('http://localhost:5000/api/inspector', {
+      const response = await fetch('http://3.17.135.110:5000/api/inspector', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

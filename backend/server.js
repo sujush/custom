@@ -10,8 +10,9 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-const SECRET_KEY = 'your-secret-key'; // 실제 운영 환경에서는 환경 변수로 관리해야 합니다.
-const SALT_ROUNDS = 10;  // 솔트 라운드 설정
+const SECRET_KEY = process.env.SECRET_KEY || 'your-secret-key';
+const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS) || 10;
+
 
 let inspectorData = {}; // 검사자 정보 저장소
 
@@ -21,9 +22,13 @@ const USER_DATA_FILE = './userData.json';
 // 사용자 데이터 읽기
 function readUserData() {
   try {
-    const data = fs.readFileSync(USER_DATA_FILE, 'utf8');
-    return JSON.parse(data);
+    if (fs.existsSync(USER_DATA_FILE)) {
+      const data = fs.readFileSync(USER_DATA_FILE, 'utf8');
+      return JSON.parse(data);
+    }
+    return [];  // 파일이 없을 경우 빈 배열 반환
   } catch (error) {
+    console.error("Error reading user data:", error);
     return [];
   }
 }

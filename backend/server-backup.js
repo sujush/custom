@@ -5,8 +5,16 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs');
 
 const app = express();
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
+
+const cors = require('cors');
+
+// Vercel에서 배포된 도메인을 origin으로 설정
+const corsOptions = {
+  origin: 'https://custom-alpha.vercel.app',  // 실제 Vercel에서 배포된 도메인으로 변경
+  optionsSuccessStatus: 200
+};
 
 const SECRET_KEY = 'your-secret-key'; // 실제 운영 환경에서는 환경 변수로 관리해야 합니다.
 
