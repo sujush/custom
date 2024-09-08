@@ -5,15 +5,18 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const cron = require('node-cron');
 const bcrypt = require('bcryptjs');
-
 const app = express();
-app.use(cors(corsOptions));
-app.use(bodyParser.json());
+
 
 const corsOptions = {
   origin: 'https://custom-alpha.vercel.app/',  // 실제 Vercel 도메인으로 변경
   optionsSuccessStatus: 200
 };
+
+
+app.use(cors(corsOptions));
+app.use(bodyParser.json());
+
 
 const SECRET_KEY = process.env.SECRET_KEY || 'your-secret-key';
 const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS) || 10;
