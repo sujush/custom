@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { checkAuth, removeToken } from '@/app/utils/auth'
+import { checkAuth, removeToken } from '@/utils/auth'
 
 interface WarehouseData {
   warehouse: string;
@@ -30,7 +30,7 @@ export default function Home() {
   const fetchAvailableWarehouses = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch('http://3.17.135.110:5000/api/available-warehouses')
+      const response = await fetch('${process.env.NEXT_PUBLIC_API_URL}/api/available-warehouses')
       if (!response.ok) {
         throw new Error('Failed to fetch available warehouses')
       }

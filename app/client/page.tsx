@@ -54,7 +54,7 @@ export default function ClientPage() {
     setSelectedTime(time)
     if (selectedWarehouse) {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/inspector?warehouse=${selectedWarehouse}&time=${time}`)
+        const response = await fetch('${process.env.NEXT_PUBLIC_API_URL}/api/inspector?warehouse=${selectedWarehouse}&time=${time}')
         if (response.ok) {
           const data = await response.json()
           setInspectorInfo(data)
@@ -89,7 +89,7 @@ export default function ClientPage() {
         <div>
           <h2 className="text-xl font-semibold mb-2">{selectedArea} 창고 목록</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {warehouses[selectedArea as keyof typeof warehouses].map((warehouse: string) => (
+            {warehouses[selectedArea as keyof typeof warehouses]?.map((warehouse: string) => (
               <Card key={warehouse} className="cursor-pointer hover:shadow-lg transition-shadow duration-300" onClick={() => handleWarehouseSelect(warehouse)}>
                 <CardContent className="flex items-center justify-center h-20 relative">
                   <h3 className="text-lg">{warehouse}</h3>
