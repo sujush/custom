@@ -30,7 +30,7 @@ export default function Home() {
   const fetchAvailableWarehouses = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch('https://${process.env.NEXT_PUBLIC_API_URL}/api/available-warehouses')
+      const response = await fetch('${process.env.NEXT_PUBLIC_API_URL}/api/available-warehouses')
       if (!response.ok) {
         throw new Error('Failed to fetch available warehouses')
       }
