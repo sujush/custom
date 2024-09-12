@@ -12,7 +12,7 @@ const fs = require('fs');
 const app = express();
 
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'https://customs-inspection.net',
+  origin: 'https://www.customs-inspection.net/',
   optionsSuccessStatus: 200
 };
 
