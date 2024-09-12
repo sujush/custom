@@ -1,25 +1,64 @@
 'use client';
 
-export const setToken = (token) => {
+export const setTokens = (accessToken, refreshToken) => {
   if (typeof window !== 'undefined') {
-    localStorage.setItem('token', token);
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
   }
 };
 
-export const getToken = () => {
+export const getAccessToken = () => {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('token');
+    return localStorage.getItem('accessToken');
   }
   return null;
 };
 
-export const removeToken = () => {
+export const getRefreshToken = () => {
   if (typeof window !== 'undefined') {
-    localStorage.removeItem('token');
+    return localStorage.getItem('refreshToken');
+  }
+  return null;
+};
+
+export const removeTokens = () => {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
   }
 };
 
 export const checkAuth = () => {
-  const token = getToken();
+  const token = getAccessToken();
   return !!token;
+};
+
+export const refreshAccessToken = async () => {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) {
+    return null;
+  }
+
+  try {
+    const response = await fetch('${process.env.NEXT_PUBLIC_API_URL}/api/refresh-token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    if (response.ok) {
+      const { accessToken, refreshToken: newRefreshToken } = await response.json();
+      setTokens(accessToken, newRefreshToken);
+      return accessToken;
+    } else {
+      removeTokens();
+      return null;
+    }
+  } catch (error) {
+    console.error('Error refreshing token:', error);
+    removeTokens();
+    return null;
+  }
 };

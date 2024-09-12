@@ -1,64 +1,74 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
-const fs = require('fs');
-const cron = require('node-cron');
 const bcrypt = require('bcryptjs');
+const mongoose = require('mongoose');
+const cron = require('node-cron');
+
 const app = express();
 
-
 const corsOptions = {
-  origin: 'https://custom-alpha.vercel.app/',  // 실제 Vercel 도메인으로 변경
+  origin: process.env.FRONTEND_URL || 'https://custom-alpha.vercel.app',
   optionsSuccessStatus: 200
 };
-
 
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
+// MongoDB 연결
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
-const SECRET_KEY = process.env.SECRET_KEY || 'your-secret-key';
-const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS) || 10;
+// 사용자 모델
+const userSchema = new mongoose.Schema({
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  nickname: { type: String, required: true }
+});
 
+const User = mongoose.model('User', userSchema);
 
-let inspectorData = {}; // 검사자 정보 저장소
+// 검사자 정보 모델
+const inspectorSchema = new mongoose.Schema({
+  date: String,
+  warehouse: String,
+  time: String,
+  fee: Number,
+  accountNumber: String,
+  bankName: String,
+  nickname: String,
+  email: String
+});
 
-// 사용자 데이터 파일 경로
-const USER_DATA_FILE = './userData.json';
+const Inspector = mongoose.model('Inspector', inspectorSchema);
 
-// 사용자 데이터 읽기
-function readUserData() {
-  try {
-    if (fs.existsSync(USER_DATA_FILE)) {
-      const data = fs.readFileSync(USER_DATA_FILE, 'utf8');
-      return JSON.parse(data);
-    }
-    return [];  // 파일이 없을 경우 빈 배열 반환
-  } catch (error) {
-    console.error("Error reading user data:", error);
-    return [];
-  }
-}
+// JWT 설정
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_EXPIRES_IN = '1h';
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
+const JWT_REFRESH_EXPIRES_IN = '7d';
 
-// 사용자 데이터 쓰기
-function writeUserData(users) {
-  fs.writeFileSync(USER_DATA_FILE, JSON.stringify(users, null, 2));
-}
-
-// 사용자 데이터 초기화
-let users = readUserData();
+// 토큰 생성 함수
+const generateTokens = (user) => {
+  const accessToken = jwt.sign({ email: user.email }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  const refreshToken = jwt.sign({ email: user.email }, JWT_REFRESH_SECRET, { expiresIn: JWT_REFRESH_EXPIRES_IN });
+  return { accessToken, refreshToken };
+};
 
 // 회원가입 API
 app.post('/api/signup', async (req, res) => {
   const { email, password, nickname } = req.body;
-  if (users.find(user => user.email === email)) {
-    return res.status(400).json({ message: '이미 존재하는 이메일입니다.' });
-  }
   try {
-    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-    users.push({ email, password: hashedPassword, nickname });
-    writeUserData(users);
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: '이미 존재하는 이메일입니다.' });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({ email, password: hashedPassword, nickname });
+    await newUser.save();
     res.json({ message: '회원가입이 완료되었습니다.' });
   } catch (error) {
     res.status(500).json({ message: '회원가입 중 오류가 발생했습니다.' });
@@ -68,21 +78,32 @@ app.post('/api/signup', async (req, res) => {
 // 로그인 API
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
-  const user = users.find(user => user.email === email);
-  if (user) {
-    try {
-      const match = await bcrypt.compare(password, user.password);
-      if (match) {
-        const token = jwt.sign({ email: user.email }, SECRET_KEY, { expiresIn: '1h' });
-        res.json({ token });
-      } else {
-        res.status(401).json({ message: '인증 실패' });
-      }
-    } catch (error) {
-      res.status(500).json({ message: '로그인 중 오류가 발생했습니다.' });
+  try {
+    const user = await User.findOne({ email });
+    if (user && await bcrypt.compare(password, user.password)) {
+      const { accessToken, refreshToken } = generateTokens(user);
+      res.json({ accessToken, refreshToken });
+    } else {
+      res.status(401).json({ message: '인증 실패' });
     }
-  } else {
-    res.status(401).json({ message: '인증 실패' });
+  } catch (error) {
+    res.status(500).json({ message: '로그인 중 오류가 발생했습니다.' });
+  }
+});
+
+// 토큰 갱신 API
+app.post('/api/refresh-token', (req, res) => {
+  const { refreshToken } = req.body;
+  if (!refreshToken) {
+    return res.status(401).json({ message: 'Refresh Token이 없습니다.' });
+  }
+
+  try {
+    const user = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
+    const { accessToken, refreshToken: newRefreshToken } = generateTokens(user);
+    res.json({ accessToken, refreshToken: newRefreshToken });
+  } catch (error) {
+    res.status(403).json({ message: 'Invalid refresh token' });
   }
 });
 
@@ -92,169 +113,121 @@ const authenticateToken = (req, res, next) => {
   const token = authHeader && authHeader.split(' ')[1];
   if (token == null) return res.sendStatus(401);
 
-  jwt.verify(token, SECRET_KEY, (err, user) => {
+  jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) return res.sendStatus(403);
     req.user = user;
     next();
   });
 };
 
-
 // 검사자 정보 등록 API
-app.post('/api/inspector', authenticateToken, (req, res) => {
+app.post('/api/inspector', authenticateToken, async (req, res) => {
   const { warehouse, time, fee, accountNumber, bankName } = req.body;
   const email = req.user.email;
-  const user = users.find(u => u.email === email);
-  if (!user) {
-    return res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
+    }
+    
+    const now = new Date();
+    const inspectionDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (now.getHours() >= 18 ? 1 : 0));
+    const formattedDate = inspectionDate.toISOString().split('T')[0];
+
+    const newInspector = new Inspector({
+      date: formattedDate,
+      warehouse,
+      time,
+      fee,
+      accountNumber,
+      bankName,
+      nickname: user.nickname,
+      email
+    });
+
+    await newInspector.save();
+    res.json({ message: `검사자 정보가 ${now.getHours() >= 18 ? '다음 날' : '오늘'}로 등록되었습니다.` });
+  } catch (error) {
+    res.status(500).json({ message: '검사자 정보 등록 중 오류가 발생했습니다.' });
   }
-  
-  const now = new Date();
-  const currentHour = now.getHours();
-  let inspectionDate = new Date(now);
-
-  // 오후 6시 이후라면 다음 날로 설정
-  if (currentHour >= 18) {
-    inspectionDate.setDate(inspectionDate.getDate() + 1);
-  }
-
-  const year = inspectionDate.getFullYear();
-  const month = String(inspectionDate.getMonth() + 1).padStart(2, '0');
-  const day = String(inspectionDate.getDate()).padStart(2, '0');
-  const formattedDate = `${year}-${month}-${day}`;
-  const key = `${formattedDate}-${warehouse}-${time}`;
-
-  console.log('Registering inspector data with key:', key);
-
-  if (!inspectorData[key]) {
-    inspectorData[key] = [];
-  }
-  
-  inspectorData[key].push({
-    date: `${year}년 ${month}월 ${day}일`,
-    warehouse,
-    time,
-    fee,
-    accountNumber,
-    bankName,
-    nickname: user.nickname,
-    email
-  });
-
-  console.log('Updated inspectorData:', inspectorData);
-
-  res.json({ message: `검사자 정보가 ${currentHour >= 18 ? '다음 날' : '오늘'}로 등록되었습니다.` });
 });
 
 // 내 검사 일정 조회 API
-app.get('/api/my-inspections', authenticateToken, (req, res) => {
+app.get('/api/my-inspections', authenticateToken, async (req, res) => {
   const userEmail = req.user.email;
-  const myInspections = [];
-
-  for (const [key, inspectors] of Object.entries(inspectorData)) {
-    console.log('key:', key);  // key 값 출력
-    const [year, month, day, ...rest] = key.split('-');
-    const warehouse = rest.slice(0, -1).join('-');
-    const time = rest[rest.length - 1];
-    console.log('year:', year, 'month:', month, 'day:', day, 'warehouse:', warehouse, 'time:', time);  // 분리된 값 출력
-    const inspector = inspectors.find(insp => insp.email === userEmail);
-    if (inspector) {
-      const formattedDate = `${year}년 ${month}월 ${day}일`;
-      myInspections.push({
-        date: formattedDate,
-        warehouse,
-        time,
-        fee: inspector.fee,
-        accountNumber: inspector.accountNumber,
-        bankName: inspector.bankName,
-        nickname: inspector.nickname,
-        email: inspector.email
-      });
-    }
+  try {
+    const myInspections = await Inspector.find({ email: userEmail });
+    res.json(myInspections);
+  } catch (error) {
+    res.status(500).json({ message: '검사 일정 조회 중 오류가 발생했습니다.' });
   }
-
-  console.log('myInspections:', myInspections);  // 전송되는 데이터 로그
-  res.json(myInspections);
-});
-
-app.get('/test', (req, res) => {
-  res.send('Server is working!');
 });
 
 // 검사자 정보 조회 API
-app.get('/api/inspector', (req, res) => {
+app.get('/api/inspector', async (req, res) => {
   const { warehouse, time } = req.query;
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-  const tomorrowStr = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`;
-  
-  console.log('Searching for dates:', todayStr, tomorrowStr);
-
-  const relevantData = Object.entries(inspectorData).filter(([key, value]) => {
-    return (key.startsWith(todayStr) || key.startsWith(tomorrowStr)) && 
-           key.includes(warehouse) && 
-           key.endsWith(time);
-  });
-
-  console.log('Relevant data:', relevantData);
-
-  const result = relevantData.flatMap(([key, inspectors]) => inspectors);
-
-  res.json(result);
+  try {
+    const inspectors = await Inspector.find({
+      date: { $in: [today.toISOString().split('T')[0], tomorrow.toISOString().split('T')[0]] },
+      warehouse,
+      time
+    });
+    res.json(inspectors);
+  } catch (error) {
+    res.status(500).json({ message: '검사자 정보 조회 중 오류가 발생했습니다.' });
+  }
 });
 
 // 가용 창고 목록을 반환하는 엔드포인트
-app.get('/api/available-warehouses', (req, res) => {
-  console.log('inspectorData:', inspectorData);
-  const availableWarehouses = Object.keys(inspectorData).map(key => {
-    console.log('Processing key:', key);
-    const [year, month, day, ...rest] = key.split('-');
-    const warehouse = rest.slice(0, -1).join('-');
-    const time = rest[rest.length - 1];
-    
-    console.log(`Parsed data: year=${year}, month=${month}, day=${day}, warehouse=${warehouse}, time=${time}`);
-
-    return { 
-      warehouse: `${month}/${day}-${warehouse}`,
-      time 
-    };
-  });
-  console.log('Available warehouses:', availableWarehouses);
-  res.json(availableWarehouses);
+app.get('/api/available-warehouses', async (req, res) => {
+  try {
+    const inspectors = await Inspector.find();
+    const availableWarehouses = inspectors.map(inspector => ({
+      warehouse: `${inspector.date.split('-')[1]}/${inspector.date.split('-')[2]}-${inspector.warehouse}`,
+      time: inspector.time
+    }));
+    res.json(availableWarehouses);
+  } catch (error) {
+    res.status(500).json({ message: '가용 창고 목록 조회 중 오류가 발생했습니다.' });
+  }
 });
-// 사용자 정보 조회 API 추가 (닉네임과 이메일 조회용)
-app.get('/api/user', authenticateToken, (req, res) => {
+
+// 사용자 정보 조회 API
+app.get('/api/user', authenticateToken, async (req, res) => {
   const userEmail = req.user.email;
-  const user = users.find(u => u.email === userEmail);
-  if (user) {
-    res.json({ email: user.email, nickname: user.nickname });
-  } else {
-    res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
+  try {
+    const user = await User.findOne({ email: userEmail }, { password: 0 });
+    if (user) {
+      res.json(user);
+    } else {
+      res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: '사용자 정보 조회 중 오류가 발생했습니다.' });
   }
 });
 
 // 오전 6시에 전날 검사 내역 삭제 스케줄러
-cron.schedule('0 6 * * *', () => {
+cron.schedule('0 6 * * *', async () => {
   console.log('오전 6시가 되어 전날의 검사 내역을 삭제합니다.');
-  const now = new Date();
-  now.setDate(now.getDate() - 1); // 전날 날짜
-  const yesterday = `${now.getMonth() + 1}/${now.getDate()}`;
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().split('T')[0];
 
-  for (const key in inspectorData) {
-    const [date, , time] = key.split('-');
-    if (date === yesterday && time !== '오후') {
-      delete inspectorData[key];
-      console.log(`삭제된 검사 내역: ${key}`);
-    }
+  try {
+    await Inspector.deleteMany({ date: yesterdayStr, time: { $ne: '오후' } });
+    console.log(`삭제된 검사 내역: ${yesterdayStr}`);
+  } catch (error) {
+    console.error('검사 내역 삭제 중 오류 발생:', error);
   }
 });
 
-
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

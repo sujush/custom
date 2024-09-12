@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { checkAuth, getToken } from '@/app/utils/auth'
+import { checkAuth, getAccessToken } from '@/app/utils/auth'
 
 const areas = ['구항', '신항', '남동']
 const warehouses: { [key: string]: string[] } = {
@@ -56,8 +56,8 @@ export default function InspectorPage() {
 
   const fetchMyInspections = async () => {
     try {
-      const token = getToken()
-      const response = await fetch('http://3.17.135.110:5000/api/my-inspections', {
+      const token = getAccessToken()
+      const response = await fetch('${process.env.NEXT_PUBLIC_API_URL}/api/my-inspections', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -74,8 +74,8 @@ export default function InspectorPage() {
   
   const fetchUserInfo = async () => {
     try {
-      const token = getToken()
-      const response = await fetch('http://3.17.135.110:5000/api/user', {
+      const token = getAccessToken()
+      const response = await fetch('${process.env.NEXT_PUBLIC_API_URL}/api/user', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -123,8 +123,8 @@ export default function InspectorPage() {
 
   const handleConfirm = async () => {
     try {
-      const token = getToken()
-      const response = await fetch('http://3.17.135.110:5000/api/inspector', {
+      const token = getAccessToken()
+      const response = await fetch('${process.env.NEXT_PUBLIC_API_URL}/api/inspector', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

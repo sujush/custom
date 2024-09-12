@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { setToken } from '@/app/utils/auth'
+import { setTokens } from '@/app/utils/auth'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -22,7 +22,7 @@ export default function LoginPage() {
     setError('')
 
     try {
-      const response = await fetch('http://3.17.135.110:5000/api/login', {
+      const response = await fetch('${process.env.NEXT_PUBLIC_API_URL}/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -30,7 +30,7 @@ export default function LoginPage() {
 
       if (response.ok) {
         const data = await response.json()
-        setToken(data.token)
+        setTokens(data.token)
         router.push('/')
       } else {
         setError('이메일 또는 비밀번호가 올바르지 않습니다.')
