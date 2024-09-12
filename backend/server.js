@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 const cron = require('node-cron');
 const https = require('https');
 const fs = require('fs');
-
+const http = require('http');
 
 
 
@@ -247,3 +247,8 @@ const httpsOptions = {
 https.createServer(httpsOptions, app).listen(443, () => {
   console.log('HTTPS Server running on port 443');
 });
+
+http.createServer((req, res) => {
+  res.writeHead(301, { "Location": "https://" + req.headers['host'] + req.url });
+  res.end();
+}).listen(80);
