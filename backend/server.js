@@ -9,11 +9,15 @@ const cron = require('node-cron');
 const https = require('https');
 const fs = require('fs');
 
+
+
+
 const app = express();
 
 const corsOptions = {
-  origin: 'https://www.customs-inspection.net/',
-  optionsSuccessStatus: 200
+  origin: 'https://www.customs-inspection.net',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
 
 app.use(cors(corsOptions));
@@ -234,11 +238,12 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-const options = {
-  key: fs.readFileSync('/path/to/private-key.pem'),
-  cert: fs.readFileSync('/path/to/certificate.pem')
+const httpsOptions = {
+  key: fs.readFileSync('/etc/letsencrypt/live/api.customs-inspection.net/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/api.customs-inspection.net/fullchain.pem')
 };
 
-https.createServer(options, app).listen(443, () => {
+
+https.createServer(httpsOptions, app).listen(443, () => {
   console.log('HTTPS Server running on port 443');
 });
