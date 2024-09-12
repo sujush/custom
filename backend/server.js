@@ -6,11 +6,13 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const cron = require('node-cron');
+const https = require('https');
+const fs = require('fs');
 
 const app = express();
 
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'https://custom-alpha.vercel.app',
+  origin: process.env.FRONTEND_URL || 'https://customs-inspection.net',
   optionsSuccessStatus: 200
 };
 
@@ -230,4 +232,13 @@ cron.schedule('0 6 * * *', async () => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+const options = {
+  key: fs.readFileSync('/path/to/private-key.pem'),
+  cert: fs.readFileSync('/path/to/certificate.pem')
+};
+
+https.createServer(options, app).listen(443, () => {
+  console.log('HTTPS Server running on port 443');
 });
