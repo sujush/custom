@@ -29,22 +29,22 @@ export default function SignupPage() {
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/signup`, {
+      const response = await fetch('${process.env.NEXT_PUBLIC_API_URL}/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, nickname, userType }),
-      });
+      }) ;
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (response.ok) {
+        console.log('회원가입 성공:', email, userType)
+        router.push('/login')  // 회원가입 성공 시 로그인 페이지로 이동
+      } else {
+        const errorData = await response.json()
+        setError(errorData.message || '회원가입 중 오류가 발생했습니다. 다시 시도해 주세요.')
       }
-      
-      const data = await response.json();
-      console.log('회원가입 성공:', data);
-      router.push('/login');
     } catch (err) {
-      console.error('회원가입 오류:', err);
-      setError('회원가입 중 오류가 발생했습니다. 나중에 다시 시도해 주세요.');
+      console.error('회원가입 오류:', err)
+      setError('회원가입 중 오류가 발생했습니다. 나중에 다시 시도해 주세요.')
     }
   }
 
