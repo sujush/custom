@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { checkAuth, removeToken } from '@/utils/auth'
+import { checkAuth, removeTokens } from '@/app/utils/auth'
 
 interface WarehouseData {
   warehouse: string;
@@ -50,7 +50,7 @@ export default function Home() {
   }
 
   const handleLogout = () => {
-    removeToken()
+    removeTokens()  // removeToken() 대신 removeTokens() 사용
     setIsLoggedIn(false)
     router.push('/')
   }
