@@ -1,46 +1,38 @@
 'use client';
 
-export const setTokens = (accessToken, refreshToken) => {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
-  }
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.customs-inspection.net';
+
+export const setTokens = (accessToken: string, refreshToken: string) => {
+  localStorage.setItem('accessToken', accessToken);
+  localStorage.setItem('refreshToken', refreshToken);
 };
 
-export const getAccessToken = () => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('accessToken');
-  }
-  return null;
+export const getAccessToken = (): string | null => {
+  return localStorage.getItem('accessToken');
 };
 
-export const getRefreshToken = () => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('refreshToken');
-  }
-  return null;
+export const getRefreshToken = (): string | null => {
+  return localStorage.getItem('refreshToken');
 };
 
 export const removeTokens = () => {
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-  }
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
 };
 
-export const checkAuth = () => {
+export const checkAuth = (): boolean => {
   const token = getAccessToken();
   return !!token;
 };
 
-export const refreshAccessToken = async () => {
+export const refreshAccessToken = async (): Promise<string | null> => {
   const refreshToken = getRefreshToken();
   if (!refreshToken) {
     return null;
   }
 
   try {
-    const response = await fetch('${process.env.NEXT_PUBLIC_API_URL}/api/refresh-token', {
+    const response = await fetch(`${API_URL}/api/refresh-token`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -49,10 +41,17 @@ export const refreshAccessToken = async () => {
     });
 
     if (response.ok) {
-      const { accessToken, refreshToken: newRefreshToken } = await response.json();
-      setTokens(accessToken, newRefreshToken);
-      return accessToken;
+      const data = await response.json();
+      if (data.accessToken && data.refreshToken) {
+        setTokens(data.accessToken, data.refreshToken);
+        return data.accessToken;
+      } else {
+        console.error('Invalid response format from refresh token endpoint');
+        removeTokens();
+        return null;
+      }
     } else {
+      console.error('Failed to refresh token:', response.status, await response.text());
       removeTokens();
       return null;
     }
@@ -61,4 +60,9 @@ export const refreshAccessToken = async () => {
     removeTokens();
     return null;
   }
+};
+
+export const logout = () => {
+  removeTokens();
+  // 필요한 경우 추가적인 로그아웃 로직을 여기에 구현
 };

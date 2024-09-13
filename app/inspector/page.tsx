@@ -8,7 +8,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { checkAuth, getAccessToken } from '@/app/utils/auth'
+import { checkAuth, getAccessToken, refreshAccessToken } from '@/app/utils/auth'
+
 
 const areas = ['구항', '신항', '남동']
 const warehouses: { [key: string]: string[] } = {
@@ -56,38 +57,68 @@ export default function InspectorPage() {
     }
   }, [router])
 
-  const fetchMyInspections = async () => {
-    try {
-      const token = getAccessToken()
-      const response = await fetch(`${API_URL}/api/my-inspections`, {
+  const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+    let token = getAccessToken();
+    if (!token) {
+      throw new Error('No access token found');
+    }
+
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (response.status === 403) {
+      const newToken = await refreshAccessToken();
+      if (!newToken) {
+        throw new Error('Failed to refresh token');
+      }
+      token = newToken;
+      return fetch(url, {
+        ...options,
         headers: {
+          ...options.headers,
           'Authorization': `Bearer ${token}`
         }
-      })
+      });
+    }
+
+    return response;
+  }
+
+  const fetchMyInspections = async () => {
+    try {
+      const response = await fetchWithAuth(`${API_URL}/api/my-inspections`);
       if (response.ok) {
         const data = await response.json()
-        console.log('Received inspection data:', data);  // 받은 데이터 로그
+        console.log('Received inspection data:', data);
         setMyInspections(data)
+      } else {
+        console.error('Failed to fetch inspections:', response.status);
+        setError('검사 정보를 불러오는데 실패했습니다.');
       }
     } catch (error) {
       console.error('Error fetching my inspections:', error)
+      setError('검사 정보를 불러오는 중 오류가 발생했습니다.');
     }
   }
   
   const fetchUserInfo = async () => {
     try {
-      const token = getAccessToken()
-      const response = await fetch(`${API_URL}/api/user`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
+      const response = await fetchWithAuth(`${API_URL}/api/user`);
       if (response.ok) {
         const data = await response.json()
         setUserInfo(data)
+      } else {
+        console.error('Failed to fetch user info:', response.status);
+        setError('사용자 정보를 불러오는데 실패했습니다.');
       }
     } catch (error) {
       console.error('Error fetching user info:', error)
+      setError('사용자 정보를 불러오는 중 오류가 발생했습니다.');
     }
   }
 
@@ -125,12 +156,10 @@ export default function InspectorPage() {
 
   const handleConfirm = async () => {
     try {
-      const token = getAccessToken()
-      const response = await fetch(`${API_URL}/api/inspector`, {
+      const response = await fetchWithAuth(`${API_URL}/api/inspector`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           warehouse: selectedWarehouse,
@@ -141,13 +170,13 @@ export default function InspectorPage() {
           accountNumber,
           bankName
         }),
-      })
+      });
 
       if (response.ok) {
         console.log('Data sent successfully')
         setConfirmed(true)
         setShowConfirmation(false)
-        fetchMyInspections()  // 새로운 검사 정보를 반영하기 위해 다시 fetch
+        fetchMyInspections()
       } else {
         const errorData = await response.json()
         console.error('Server error:', errorData)
