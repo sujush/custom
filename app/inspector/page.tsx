@@ -28,6 +28,8 @@ interface Inspection {
   bankName: string;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.customs-inspection.net';
+
 export default function InspectorPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [selectedArea, setSelectedArea] = useState('')
@@ -57,7 +59,7 @@ export default function InspectorPage() {
   const fetchMyInspections = async () => {
     try {
       const token = getAccessToken()
-      const response = await fetch('${process.env.NEXT_PUBLIC_API_URL}/api/my-inspections', {
+      const response = await fetch(`${API_URL}/api/my-inspections`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -75,7 +77,7 @@ export default function InspectorPage() {
   const fetchUserInfo = async () => {
     try {
       const token = getAccessToken()
-      const response = await fetch('${process.env.NEXT_PUBLIC_API_URL}/api/user', {
+      const response = await fetch(`${API_URL}/api/user`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -124,7 +126,7 @@ export default function InspectorPage() {
   const handleConfirm = async () => {
     try {
       const token = getAccessToken()
-      const response = await fetch('${process.env.NEXT_PUBLIC_API_URL}/api/inspector', {
+      const response = await fetch(`${API_URL}/api/inspector`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

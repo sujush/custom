@@ -10,6 +10,8 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.customs-inspection.net';
+
 export default function SignupPage() {
   const [nickname, setNickname] = useState('')  // 닉네임 상태 추가
   const [email, setEmail] = useState('')
@@ -29,7 +31,7 @@ export default function SignupPage() {
     }
 
     try {
-      const response = await fetch('${process.env.NEXT_PUBLIC_API_URL}/api/signup', {
+      const response = await fetch(`${API_URL}/api/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, nickname, userType }),
@@ -56,11 +58,11 @@ export default function SignupPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-              <Label htmlFor="nickname">닉네임</Label>  {/* 닉네임 입력 필드 추가 */}
+              <Label htmlFor="nickname">닉네임</Label>
               <Input
                 id="nickname"
                 type="text"
-                placeholder=""
+                placeholder="닉네임을 입력하세요"
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
                 required
@@ -71,7 +73,7 @@ export default function SignupPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder=""
+                placeholder="이메일을 입력하세요"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

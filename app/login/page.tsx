@@ -10,19 +10,21 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { setTokens } from '@/app/utils/auth'
 
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.customs-inspection.net';
+
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const router = useRouter()
 
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
     try {
-      const response = await fetch('${process.env.NEXT_PUBLIC_API_URL}/api/login', {
+      const response = await fetch(`${API_URL}/api//login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -30,8 +32,8 @@ export default function LoginPage() {
 
       if (response.ok) {
         const data = await response.json()
-        setTokens(data.token)
-        router.push('/')
+        setTokens(data.token)  // 받은 토큰을 저장하는 함수
+        router.push('/')  // 로그인 성공 시 메인 페이지로 이동
       } else {
         setError('이메일 또는 비밀번호가 올바르지 않습니다.')
       }
@@ -53,7 +55,7 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder=""
+                placeholder="이메일을 입력하세요"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

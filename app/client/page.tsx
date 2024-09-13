@@ -21,6 +21,8 @@ interface Inspector {
   bankName: string;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.customs-inspection.net';
+
 export default function ClientPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [selectedArea, setSelectedArea] = useState('')
@@ -54,7 +56,7 @@ export default function ClientPage() {
     setSelectedTime(time)
     if (selectedWarehouse) {
       try {
-        const response = await fetch('${process.env.NEXT_PUBLIC_API_URL}/api/inspector?warehouse=${selectedWarehouse}&time=${time}')
+        const response = await fetch(`${API_URL}/api/inspector?warehouse=${selectedWarehouse}&time=${time}`)
         if (response.ok) {
           const data = await response.json()
           setInspectorInfo(data)

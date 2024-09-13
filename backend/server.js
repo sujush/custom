@@ -58,6 +58,39 @@ const generateTokens = (user) => {
   return { accessToken, refreshToken };
 };
 
+
+const AWS = require('aws-sdk');
+const secretsManager = new AWS.SecretsManager({
+    region: 'us-east-2'  // 예: 'us-west-2'
+});
+
+async function loadSecretsToEnv() {
+    const secretName = "custom_project_env";  // AWS Secrets Manager에 저장한 비밀의 이름
+    
+    try {
+        const data = await secretsManager.getSecretValue({ SecretId: secretName }).promise();
+        
+        if (data.SecretString) {
+            const secrets = JSON.parse(data.SecretString); // JSON 형식으로 저장된 비밀을 파싱
+            
+            // 환경 변수 설정
+            process.env.API_KEY = secrets.API_KEY;  // 예시: 비밀로부터 API_KEY 가져오기
+            process.env.DATABASE_URL = secrets.DATABASE_URL;
+            
+            console.log('Secrets loaded successfully.');
+        } else {
+            console.error('SecretString not found.');
+        }
+    } catch (err) {
+        console.error('Error retrieving secrets:', err);
+    }
+}
+
+// 애플리케이션 시작 전에 비밀 로드
+loadSecretsToEnv();
+
+
+
 // 회원가입 API
 app.post('/api/signup', async (req, res) => {
   const { email, password, nickname } = req.body;
