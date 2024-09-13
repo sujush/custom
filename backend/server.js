@@ -6,12 +6,18 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const cron = require('node-cron');
+const https = require('https');
+const fs = require('fs');
+const http = require('http');
+
+
 
 const app = express();
 
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'https://custom-alpha.vercel.app',
-  optionsSuccessStatus: 200
+  origin: 'https://www.customs-inspection.net',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
 
 app.use(cors(corsOptions));
@@ -264,3 +270,18 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+const httpsOptions = {
+  key: fs.readFileSync('/etc/letsencrypt/live/api.customs-inspection.net/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/api.customs-inspection.net/fullchain.pem')
+};
+
+
+https.createServer(httpsOptions, app).listen(443, () => {
+  console.log('HTTPS Server running on port 443');
+});
+
+http.createServer((req, res) => {
+  res.writeHead(301, { "Location": "https://" + req.headers['host'] + req.url });
+  res.end();
+}).listen(80);

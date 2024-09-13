@@ -35,7 +35,8 @@ export default function SignupPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, nickname, userType }),
-      })
+      }) ;
+      
       if (response.ok) {
         console.log('회원가입 성공:', email, userType)
         router.push('/login')  // 회원가입 성공 시 로그인 페이지로 이동
