@@ -12,6 +12,8 @@ interface WarehouseData {
   time: string;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.customs-inspection.net';
+
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [availableWarehouses, setAvailableWarehouses] = useState<WarehouseData[]>([])
@@ -30,7 +32,7 @@ export default function Home() {
   const fetchAvailableWarehouses = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch('${process.env.NEXT_PUBLIC_API_URL}/api/available-warehouses')
+      const response = await fetch(`${API_URL}/api/available-warehouses`)
       if (!response.ok) {
         throw new Error('Failed to fetch available warehouses')
       }
