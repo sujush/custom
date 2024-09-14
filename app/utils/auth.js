@@ -7,6 +7,7 @@ const isClient = typeof window !== 'undefined';
 
 export const setTokens = (accessToken, refreshToken) => {
   if (isClient) {
+    console.log('Storing tokens:', accessToken, refreshToken);
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('refreshToken', refreshToken);
   }
