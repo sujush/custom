@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { setTokens } from '@/app/utils/auth'
+import { fetchWithAuth } from '@/app/utils/api';
 
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.customs-inspection.net';
@@ -24,7 +25,7 @@ export default function LoginPage() {
     setError('')
 
     try {
-      const response = await fetch(`${API_URL}/api/login`, {
+      const response = await fetchWithAuth(`${API_URL}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

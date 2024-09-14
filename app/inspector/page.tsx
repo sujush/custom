@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { checkAuth, getAccessToken, refreshAccessToken } from '@/app/utils/auth'
+import { fetchWithAuth } from '@/app/utils/api';
 
 
 const areas = ['구항', '신항', '남동']
@@ -60,43 +61,6 @@ export default function InspectorPage() {
   
     checkAuthAndFetchData();
   }, [router]);
-
-  const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
-    let token = getAccessToken();
-    if (!token) {
-      router.push('/login?redirectTo=/inspector');
-      throw new Error('No access token found');
-    }
-  
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        ...options.headers,
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include'
-    });
-  
-    if (response.status === 401 || response.status === 403) {
-      const newToken = await refreshAccessToken();
-      if (!newToken) {
-        router.push('/login?redirectTo=/inspector');
-        throw new Error('Failed to refresh token');
-      }
-      return fetch(url, {
-        ...options,
-        headers: {
-          ...options.headers,
-          'Authorization': `Bearer ${newToken}`,
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-      });
-    }
-  
-    return response;
-  }
 
   const fetchMyInspections = async () => {
     try {

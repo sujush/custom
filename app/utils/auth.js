@@ -32,14 +32,14 @@ export const checkAuth = (): boolean => {
   return !!token;
 };
 
-export const refreshAccessToken = async (): Promise<string | null> => {
-  const refreshToken = getRefreshToken();
+export const refreshAccessToken = async () => {
+  const refreshToken = localStorage.getItem('refreshToken');
   if (!refreshToken) {
     return null;
   }
 
   try {
-    const response = await fetch(`${API_URL}/api/refresh-token`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/refresh-token`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -48,23 +48,19 @@ export const refreshAccessToken = async (): Promise<string | null> => {
     });
 
     if (response.ok) {
-      const data = await response.json();
-      if (data.accessToken && data.refreshToken) {
-        setTokens(data.accessToken, data.refreshToken);
-        return data.accessToken;
-      } else {
-        console.error('Invalid response format from refresh token endpoint');
-        removeTokens();
-        return null;
-      }
+      const { accessToken, refreshToken: newRefreshToken } = await response.json();
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', newRefreshToken);
+      return accessToken;
     } else {
-      console.error('Failed to refresh token:', response.status, await response.text());
-      removeTokens();
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
       return null;
     }
   } catch (error) {
     console.error('Error refreshing token:', error);
-    removeTokens();
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     return null;
   }
 };
