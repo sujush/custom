@@ -5,18 +5,18 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.customs-inspecti
 // localStorage 접근 전 window 객체 확인
 const isClient = typeof window !== 'undefined';
 
-export const setTokens = (accessToken: string, refreshToken: string) => {
+export const setTokens = (accessToken, refreshToken) => {
   if (isClient) {
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('refreshToken', refreshToken);
   }
 };
 
-export const getAccessToken = (): string | null => {
+export const getAccessToken = () => {
   return isClient ? localStorage.getItem('accessToken') : null;
 };
 
-export const getRefreshToken = (): string | null => {
+export const getRefreshToken = () => {
   return isClient ? localStorage.getItem('refreshToken') : null;
 };
 
@@ -27,7 +27,7 @@ export const removeTokens = () => {
   }
 };
 
-export const checkAuth = (): boolean => {
+export const checkAuth = () => {
   const token = getAccessToken();
   return !!token;
 };

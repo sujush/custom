@@ -87,7 +87,7 @@ export default function InspectorPage() {
         throw new Error('Failed to fetch user info');
       }
     } catch (error) {
-      console.error('Error fetching user info:', error);
+      console.error('Failed to fetch user info:', error);
       setError('사용자 정보를 불러오는 중 오류가 발생했습니다.');
     }
   }
@@ -131,7 +131,7 @@ export default function InspectorPage() {
         body: JSON.stringify({
           warehouse: selectedWarehouse,
           time: selectedTime,
-          nickname: userInfo.nickname,
+          nickname: userInfo.nickname, 
           email: userInfo.email,
           fee,
           accountNumber,

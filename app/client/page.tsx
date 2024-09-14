@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 import { checkAuth } from '@/app/utils/auth'
+import { fetchWithAuth } from '@/app/utils/api';
 
 const areas = ['구항', '신항', '남동']
 const warehouses = {
