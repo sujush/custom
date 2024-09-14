@@ -34,7 +34,7 @@ export default function LoginPage() {
 
       if (response.ok) {
         const data = await response.json()
-        setTokens(data.token)  // 받은 토큰을 저장하는 함수
+        setTokens(data.accessToken, data.refreshToken)  // 받은 토큰을 저장하는 함수
         router.push('/')  // 로그인 성공 시 메인 페이지로 이동
       } else {
         setError('이메일 또는 비밀번호가 올바르지 않습니다.')
