@@ -56,7 +56,9 @@ export default function ClientPage() {
     setSelectedTime(time)
     if (selectedWarehouse) {
       try {
-        const response = await fetch(`${API_URL}/api/inspector?warehouse=${selectedWarehouse}&time=${time}`)
+        const response = await fetch(`${API_URL}/api/inspector?warehouse=${selectedWarehouse}&time=${time}`, {
+          credentials: 'include'
+        })
         if (response.ok) {
           const data = await response.json()
           setInspectorInfo(data)
