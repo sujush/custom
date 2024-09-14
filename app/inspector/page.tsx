@@ -64,6 +64,7 @@ export default function InspectorPage() {
   const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     let token = getAccessToken();
     if (!token) {
+      router.push('/login?redirectTo=/inspector');
       throw new Error('No access token found');
     }
   
@@ -73,23 +74,24 @@ export default function InspectorPage() {
         ...options.headers,
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
-      }
+      },
+      credentials: 'include'
     });
   
-    if (response.status === 401) {
-      // 토큰이 만료된 경우
+    if (response.status === 401 || response.status === 403) {
       const newToken = await refreshAccessToken();
       if (!newToken) {
+        router.push('/login?redirectTo=/inspector');
         throw new Error('Failed to refresh token');
       }
-      // 새 토큰으로 재시도
       return fetch(url, {
         ...options,
         headers: {
           ...options.headers,
           'Authorization': `Bearer ${newToken}`,
           'Content-Type': 'application/json'
-        }
+        },
+        credentials: 'include'
       });
     }
   
