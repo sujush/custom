@@ -1,5 +1,6 @@
 'use client';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.customs-inspection.net';
 
 // localStorage 접근 전 window 객체 확인
 const isClient = typeof window !== 'undefined';
