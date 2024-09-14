@@ -48,44 +48,51 @@ export default function InspectorPage() {
   const router = useRouter()
 
   useEffect(() => {
-    if (!checkAuth()) {
-      router.push('/login?redirectTo=/inspector')
-    } else {
-      fetchUserInfo()
-      setIsAuthenticated(true)
-      fetchMyInspections()
-    }
-  }, [router])
+    const checkAuthAndFetchData = async () => {
+      if (!checkAuth()) {
+        router.push('/login?redirectTo=/inspector');
+      } else {
+        setIsAuthenticated(true);
+        await fetchUserInfo();
+        await fetchMyInspections();
+      }
+    };
+  
+    checkAuthAndFetchData();
+  }, [router]);
 
   const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     let token = getAccessToken();
     if (!token) {
       throw new Error('No access token found');
     }
-
+  
     const response = await fetch(url, {
       ...options,
       headers: {
         ...options.headers,
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
       }
     });
-
-    if (response.status === 403) {
+  
+    if (response.status === 401) {
+      // 토큰이 만료된 경우
       const newToken = await refreshAccessToken();
       if (!newToken) {
         throw new Error('Failed to refresh token');
       }
-      token = newToken;
+      // 새 토큰으로 재시도
       return fetch(url, {
         ...options,
         headers: {
           ...options.headers,
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${newToken}`,
+          'Content-Type': 'application/json'
         }
       });
     }
-
+  
     return response;
   }
 
@@ -93,15 +100,13 @@ export default function InspectorPage() {
     try {
       const response = await fetchWithAuth(`${API_URL}/api/my-inspections`);
       if (response.ok) {
-        const data = await response.json()
-        console.log('Received inspection data:', data);
-        setMyInspections(data)
+        const data = await response.json();
+        setMyInspections(data);
       } else {
-        console.error('Failed to fetch inspections:', response.status);
-        setError('검사 정보를 불러오는데 실패했습니다.');
+        throw new Error('Failed to fetch inspections');
       }
     } catch (error) {
-      console.error('Error fetching my inspections:', error)
+      console.error('Error fetching my inspections:', error);
       setError('검사 정보를 불러오는 중 오류가 발생했습니다.');
     }
   }
@@ -110,14 +115,13 @@ export default function InspectorPage() {
     try {
       const response = await fetchWithAuth(`${API_URL}/api/user`);
       if (response.ok) {
-        const data = await response.json()
-        setUserInfo(data)
+        const data = await response.json();
+        setUserInfo(data);
       } else {
-        console.error('Failed to fetch user info:', response.status);
-        setError('사용자 정보를 불러오는데 실패했습니다.');
+        throw new Error('Failed to fetch user info');
       }
     } catch (error) {
-      console.error('Error fetching user info:', error)
+      console.error('Error fetching user info:', error);
       setError('사용자 정보를 불러오는 중 오류가 발생했습니다.');
     }
   }
@@ -158,9 +162,6 @@ export default function InspectorPage() {
     try {
       const response = await fetchWithAuth(`${API_URL}/api/inspector`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           warehouse: selectedWarehouse,
           time: selectedTime,
@@ -171,20 +172,18 @@ export default function InspectorPage() {
           bankName
         }),
       });
-
+  
       if (response.ok) {
-        console.log('Data sent successfully')
-        setConfirmed(true)
-        setShowConfirmation(false)
-        fetchMyInspections()
+        setConfirmed(true);
+        setShowConfirmation(false);
+        fetchMyInspections();
       } else {
-        const errorData = await response.json()
-        console.error('Server error:', errorData)
-        setError(errorData.message || '서버 오류가 발생했습니다.')
+        const errorData = await response.json();
+        setError(errorData.message || '서버 오류가 발생했습니다.');
       }
     } catch (error) {
-      console.error('Network error:', error)
-      setError('네트워크 오류가 발생했습니다.')
+      console.error('Network error:', error);
+      setError('네트워크 오류가 발생했습니다.');
     }
   }
 

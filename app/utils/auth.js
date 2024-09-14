@@ -2,22 +2,29 @@
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.customs-inspection.net';
 
+// localStorage 접근 전 window 객체 확인
+const isClient = typeof window !== 'undefined';
+
 export const setTokens = (accessToken: string, refreshToken: string) => {
-  localStorage.setItem('accessToken', accessToken);
-  localStorage.setItem('refreshToken', refreshToken);
+  if (isClient) {
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
+  }
 };
 
 export const getAccessToken = (): string | null => {
-  return localStorage.getItem('accessToken');
+  return isClient ? localStorage.getItem('accessToken') : null;
 };
 
 export const getRefreshToken = (): string | null => {
-  return localStorage.getItem('refreshToken');
+  return isClient ? localStorage.getItem('refreshToken') : null;
 };
 
 export const removeTokens = () => {
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('refreshToken');
+  if (isClient) {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+  }
 };
 
 export const checkAuth = (): boolean => {
