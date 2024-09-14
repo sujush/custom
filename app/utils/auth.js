@@ -14,7 +14,9 @@ export const setTokens = (accessToken, refreshToken) => {
 };
 
 export const getAccessToken = () => {
-  return isClient ? localStorage.getItem('accessToken') : null;
+  const token = isClient ? localStorage.getItem('accessToken') : null;
+  console.log('Getting accessToken:', token); // 저장된 토큰 값 확인
+  return token;
 };
 
 export const getRefreshToken = () => {

@@ -2,6 +2,8 @@ import { getAccessToken, refreshAccessToken } from './auth';
 
 export const fetchWithAuth = async (url, options = {}) => {
   let token = getAccessToken();
+  console.log('Using token for fetch:', token); // 요청 시 사용하는 토큰 값 확인
+
 
   if (!token) {
     token = await refreshAccessToken();
