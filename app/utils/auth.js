@@ -10,6 +10,10 @@ export const setTokens = (accessToken, refreshToken) => {
     console.log('Storing tokens:', accessToken, refreshToken);
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('refreshToken', refreshToken);
+
+    // 저장이 제대로 되었는지 확인
+    console.log('Access Token from localStorage:', localStorage.getItem('accessToken'));
+    console.log('Refresh Token from localStorage:', localStorage.getItem('refreshToken'));
   }
 };
 

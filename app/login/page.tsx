@@ -32,6 +32,11 @@ export default function LoginPage() {
         credentials: 'include'
       })
 
+      // 응답 상태 코드와 데이터 로깅
+      console.log('Login response status:', response.status);
+      const data = await response.json();
+      console.log('Login response data:', data);
+
       if (response.ok) {
         const data = await response.json()
         console.log('Login response data:', data); // 응답 데이터 확인
