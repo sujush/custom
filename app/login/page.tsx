@@ -38,8 +38,6 @@ export default function LoginPage() {
       console.log('Login response data:', data);
 
       if (response.ok) {
-        const data = await response.json()
-        console.log('Login response data:', data); // 응답 데이터 확인
         setTokens(data.accessToken, data.refreshToken)  // 받은 토큰을 저장하는 함수
         router.push('/')  // 로그인 성공 시 메인 페이지로 이동
       } else {
