@@ -189,7 +189,7 @@ export default function InspectorPage() {
         <p>이메일: {userInfo.email}</p>
       </div>
 
-      // 내 검사 일정 UI
+       {/*내 검사 일정 UI */}
       {myInspections.length > 0 && (
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-2">내 검사 일정</h2>
