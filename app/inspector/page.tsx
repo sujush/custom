@@ -12,6 +12,7 @@ import { checkAuth } from '@/app/utils/auth'
 import { fetchWithAuth } from '@/app/utils/api';
 
 
+
 const areas = ['구항', '신항', '남동']
 const warehouses: { [key: string]: string[] } = {
   '구항': ['성민 보세창고', '더로지스2보세창고', '백마보세창고', '백마제2보세창고', '베델로지스틱스 보세창고', '조양 보세창고'],
@@ -20,6 +21,7 @@ const warehouses: { [key: string]: string[] } = {
 }
 
 interface Inspection {
+  _id: string; // _id 속성을 추가
   date: string;
   warehouse: string;
   time: string;
@@ -101,7 +103,7 @@ export default function InspectorPage() {
 
       if (response.ok) {
         // 삭제 성공 시, 로컬 상태 업데이트
-        setMyInspections(myInspections.filter(inspection => inspection._id !== id));
+        setMyInspections(myInspections.filter((inspection: Inspection) => inspection._id !== id));
       } else {
         const errorData = await response.json();
         setError(errorData.message || '검사 의뢰 삭제 중 오류가 발생했습니다.');
