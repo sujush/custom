@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { fetchWithAuth } from '@/app/utils/api';
+
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.customs-inspection.net';
 
@@ -32,7 +32,7 @@ export default function SignupPage() {
     }
 
     try {
-      const response = await fetchWithAuth(`${API_URL}/api/signup`, {
+      const response = await fetch(`${API_URL}/api/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, nickname, userType }),
