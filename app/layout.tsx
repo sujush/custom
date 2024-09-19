@@ -1,3 +1,5 @@
+"use client"
+
 import './globals.css';
 import { useEffect, useState } from 'react';
 import { fetchWithAuth } from '@/app/utils/api';
