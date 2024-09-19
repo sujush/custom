@@ -60,7 +60,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           <div className="w-1/3"></div>
           <h1 className="text-3xl font-bold text-center w-1/3">
-            세관 검사 대행자 찾기
+            검사 대행 찾기
           </h1>
           <div className="w-1/3 flex justify-end">
             {isLoggedIn ? (
