@@ -3,7 +3,7 @@
 import './globals.css';
 
 export const metadata = {
-  title: '세관 검사 대행자 찾기',
+  title: '검사 대행 찾기',
   description: '세관 검사 대행 서비스 매칭 플랫폼',
 };
 
