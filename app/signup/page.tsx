@@ -37,8 +37,8 @@ export default function SignupPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, nickname, userType }),
         credentials: 'include'
-      }) ;
-      
+      });
+
       if (response.ok) {
         console.log('회원가입 성공:', email, userType)
         router.push('/login')  // 회원가입 성공 시 로그인 페이지로 이동
@@ -60,7 +60,7 @@ export default function SignupPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
+            <div className="space-y-2">
               <Label htmlFor="nickname">닉네임</Label>
               <Input
                 id="nickname"
@@ -103,8 +103,7 @@ export default function SignupPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="userType">사용자 유형</Label>
-              <Select onValueChange={setUserType} required>
+              <Select onValueChange={(value) => setUserType(value)} required>
                 <SelectTrigger>
                   <SelectValue placeholder="사용자 유형을 선택하세요" />
                 </SelectTrigger>

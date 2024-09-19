@@ -58,7 +58,7 @@ export default function InspectorPage() {
         await fetchMyInspections();
       }
     };
-  
+
     checkAuthAndFetchData();
   }, [router]);
 
@@ -76,7 +76,7 @@ export default function InspectorPage() {
       setError('검사 정보를 불러오는 중 오류가 발생했습니다.');
     }
   }
-  
+
   const fetchUserInfo = async () => {
     try {
       const response = await fetchWithAuth(`${API_URL}/api/user`);
@@ -91,6 +91,27 @@ export default function InspectorPage() {
       setError('사용자 정보를 불러오는 중 오류가 발생했습니다.');
     }
   }
+
+  // 삭제 함수 구현 (handleDeleteInspection)
+  const handleDeleteInspection = async (id: string) => {
+    try {
+      const response = await fetchWithAuth(`${API_URL}/api/inspector/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        // 삭제 성공 시, 로컬 상태 업데이트
+        setMyInspections(myInspections.filter(inspection => inspection._id !== id));
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || '검사 의뢰 삭제 중 오류가 발생했습니다.');
+      }
+    } catch (error) {
+      console.error('Error deleting inspection:', error);
+      setError('네트워크 오류가 발생했습니다.');
+    }
+  };
+
 
   const handleAreaSelect = (area: string) => {
     setSelectedArea(area)
@@ -131,14 +152,14 @@ export default function InspectorPage() {
         body: JSON.stringify({
           warehouse: selectedWarehouse,
           time: selectedTime,
-          nickname: userInfo.nickname, 
+          nickname: userInfo.nickname,
           email: userInfo.email,
           fee,
           accountNumber,
           bankName
         }),
       });
-  
+
       if (response.ok) {
         setConfirmed(true);
         setShowConfirmation(false);
@@ -168,20 +189,20 @@ export default function InspectorPage() {
         <p>이메일: {userInfo.email}</p>
       </div>
 
-
-      {/* 내 검사 일정 UI */}
+      // 내 검사 일정 UI
       {myInspections.length > 0 && (
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-2">내 검사 일정</h2>
           {myInspections.map((inspection: Inspection, index: number) => (
             <Card key={index} className="mb-4">
               <CardContent className="p-4">
-                <p>{`${inspection.date} ${inspection.warehouse} ${inspection.time}검사`}</p>
+                <p>{`${inspection.date} ${inspection.warehouse} ${inspection.time} 검사`}</p>
                 <p>닉네임: {inspection.nickname}</p>
                 <p>이메일: {inspection.email}</p>
                 <p>검사비용: {inspection.fee}원</p>
                 <p>연락처: {inspection.accountNumber}</p>
                 <p>계좌번호: {inspection.bankName}</p>
+                <Button variant="destructive" onClick={() => handleDeleteInspection(inspection._id)}>삭제</Button>
               </CardContent>
             </Card>
           ))}
