@@ -151,7 +151,11 @@ export default function SignupPage() {
                   </ul>
                 </div>
               </div>
-              <Checkbox id="agreement" checked={isAgreed} onCheckedChange={(checked) => setIsAgreed(checked)} />
+              <Checkbox
+                id="agreement"
+                checked={isAgreed}
+                onCheckedChange={(checked) => setIsAgreed(checked === true)}
+              />
               <Label htmlFor="agreement">개인정보 수집 및 이용에 동의합니다.</Label>
             </div>
             {error && (
