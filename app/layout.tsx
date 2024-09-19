@@ -1,37 +1,33 @@
-"use client"
+// app/layout.tsx
 
 import './globals.css';
-import { useEffect, useState } from 'react';
-import { fetchWithAuth } from '@/app/utils/api';
 
 export const metadata = {
   title: '세관 검사 대행자 찾기',
   description: '세관 검사 대행 서비스 매칭 플랫폼',
 };
 
-export default function RootLayout({
+async function getUserInfo() {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user`, {
+      credentials: 'include', // 쿠키를 포함하여 사용자 정보를 가져옵니다.
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return data.nickname;
+    }
+  } catch (error) {
+    console.error('Failed to fetch user info:', error);
+  }
+  return ''; // 오류 발생 시 빈 문자열 반환
+}
+
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [nickname, setNickname] = useState('');
-
-  useEffect(() => {
-    // 사용자 정보 가져오기
-    const fetchUserInfo = async () => {
-      try {
-        const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/user`);
-        if (response.ok) {
-          const data = await response.json();
-          setNickname(data.nickname);
-        }
-      } catch (error) {
-        console.error('Failed to fetch user info:', error);
-      }
-    };
-
-    fetchUserInfo();
-  }, []);
+  const nickname = await getUserInfo(); // 서버에서 사용자 정보를 가져옵니다.
 
   return (
     <html lang="ko">
