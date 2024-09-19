@@ -111,11 +111,12 @@ export default function SignupPage() {
               />
             </div>
             <div className="space-y-2">
+              <Label htmlFor="userType">사용자 유형</Label>
               <Select onValueChange={(value) => setUserType(value)} required>
-                <SelectTrigger>
+                <SelectTrigger className="bg-white"> {/* 배경색 추가 */}
                   <SelectValue placeholder="사용자 유형을 선택하세요" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white"> {/* 배경색 추가 */}
                   <SelectItem value="client">의뢰인</SelectItem>
                   <SelectItem value="inspector">검사자</SelectItem>
                 </SelectContent>
