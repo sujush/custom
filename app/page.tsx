@@ -1,11 +1,11 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { checkAuth, removeTokens } from '@/app/utils/auth'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { checkAuth, removeTokens } from '@/app/utils/auth';
 
 interface WarehouseData {
   warehouse: string;
@@ -14,48 +14,45 @@ interface WarehouseData {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.customs-inspection.net';
 
-export default function Home() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [availableWarehouses, setAvailableWarehouses] = useState<WarehouseData[]>([])
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
-
-  // const today = new Date()
-  // const formattedDate = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`
+export default function HomePage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [availableWarehouses, setAvailableWarehouses] = useState<WarehouseData[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    setIsLoggedIn(checkAuth())
-    fetchAvailableWarehouses()
-  }, [])
+    setIsLoggedIn(checkAuth());
+    fetchAvailableWarehouses();
+  }, []);
 
   const fetchAvailableWarehouses = async () => {
     try {
-      setIsLoading(true)
-      const response = await fetch(`${API_URL}/api/available-warehouses`)
+      setIsLoading(true);
+      const response = await fetch(`${API_URL}/api/available-warehouses`);
       if (!response.ok) {
-        throw new Error('Failed to fetch available warehouses')
+        throw new Error('Failed to fetch available warehouses');
       }
-      const data: WarehouseData[] = await response.json()
-      console.log('Fetched data:', data) // 디버깅을 위한 로그
-      setAvailableWarehouses(data)
+      const data: WarehouseData[] = await response.json();
+      console.log('Fetched data:', data); // 디버깅을 위한 로그
+      setAvailableWarehouses(data);
     } catch (error: unknown) {
-      console.error('Error fetching available warehouses:', error)
+      console.error('Error fetching available warehouses:', error);
       if (error instanceof Error) {
-        setError(error.message)
+        setError(error.message);
       } else {
-        setError('알 수 없는 오류가 발생했습니다.')
+        setError('알 수 없는 오류가 발생했습니다.');
       }
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleLogout = () => {
-    removeTokens()  // removeToken() 대신 removeTokens() 사용
-    setIsLoggedIn(false)
-    router.push('/')
-  }
+    removeTokens();
+    setIsLoggedIn(false);
+    router.push('/');
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -67,14 +64,20 @@ export default function Home() {
           </h1>
           <div className="w-1/3 flex justify-end">
             {isLoggedIn ? (
-              <Button onClick={handleLogout} className="bg-white text-black hover:bg-gray-200">로그아웃</Button>
+              <Button onClick={handleLogout} className="bg-white text-black hover:bg-gray-200">
+                로그아웃
+              </Button>
             ) : (
               <>
                 <Link href="/login" passHref>
-                  <Button variant="outline" className="mr-2 text-black bg-white border-white hover:bg-gray-200">로그인</Button>
+                  <Button variant="outline" className="mr-2 text-black bg-white border-white hover:bg-gray-200">
+                    로그인
+                  </Button>
                 </Link>
                 <Link href="/signup" passHref>
-                  <Button className="bg-white text-black hover:bg-gray-200">회원가입</Button>
+                  <Button className="bg-white text-black hover:bg-gray-200">
+                    회원가입
+                  </Button>
                 </Link>
               </>
             )}
@@ -127,8 +130,15 @@ export default function Home() {
               )}
             </CardContent>
           </Card>
+
+          {/* "이용 방법 및 필독사항" 링크 추가 */}
+          <div className="mt-8 text-center">
+            <Link href="/notice" passHref>
+              <a className="text-blue-600 hover:underline">이용 방법 및 필독사항</a>
+            </Link>
+          </div>
         </div>
       </main>
     </div>
-  )
+  );
 }

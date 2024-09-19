@@ -129,8 +129,8 @@ export default function ClientPage() {
                   <p><strong>닉네임:</strong> {inspector.nickname}</p>
                   <p><strong>이메일:</strong> {inspector.email}</p>
                   <p><strong>검사비용:</strong> {inspector.fee}원</p>
-                  <p><strong>계좌번호:</strong> {inspector.accountNumber}</p>
-                  <p><strong>은행명:</strong> {inspector.bankName}</p>
+                  <p><strong>연락처:</strong> {inspector.accountNumber}</p>
+                  <p><strong>계좌번호:</strong> {inspector.bankName}</p>
                 </CardContent>
               </Card>
             ))
